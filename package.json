@@ -1,0 +1,21 @@
+{
+  "name": "model-test-ann",
+  "version": "1.0.0",
+  "description": "A node app to test an Artificial Neural Network for handwritten numbers",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "keywords": [
+    "ann",
+    "keras",
+    "js",
+    "node"
+  ],
+  "author": "mauro alvarez",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

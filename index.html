@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"
+      type="text/javascript"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+    <title>ANN for handwritten numbers</title>
+    <style>
+      body {
+        font-family: fantasy;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      #wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+      }
+      #predictBtn {
+        width: 10em;
+        height: 5em;
+        background-color: aquamarine;
+        border-radius: 2em;
+        font-size: 14px;
+        font-family: fantasy;
+        cursor: pointer;
+      }
+      #predictionLabel {
+        border: 1px solid blue;
+        padding: 2em;
+        font-family: fantasy;
+        font-size: 14px;
+      }
+      #drawing-area {
+        width: 300px;
+        height: 300px;
+        cursor: crosshair;
+        border: 1px solid blue;
+      }
+      marquee {
+        background-color: bisque;
+      }
+      footer {
+        display: flex;
+        background-color: bisque;
+        font-size: 14px;
+        text-align: center;
+        margin-top: auto;
+        height: 4em;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <marquee><i>Write a number for Numbotron the guess!!!</i></marquee>
+    <div id="wrapper">
+      <div id="first-column-wrapper">
+        <h2>Draw a number for the model to guess...</h2>
+        <canvas id="drawing-area"></canvas>
+        <div id="image-preview"></div>
+      </div>
+      <button id="predictBtn" onclick="guessBtn()">Guess!</button>
+      <label id="predictionLabel">Here's the prediction!</label>
+    </div>
+    <footer>&copy; Artificial Neural Network Model</footer>
+    <script type="text/javascript">
+      var model, canvas;
+
+      async function guessBtn() {
+        var img = new Image(28, 28);
+        img.src = canvas.toDataURL("image/png");
+        document.getElementById("image-preview").appendChild(img);
+
+        let image_toPredict = tf.browser.fromPixels(img);
+        image_toPredict = image_toPredict.reshape([null, 28, 28, 1]);
+        const prediction = model.predict(image_toPredict);
+
+        console.log(prediction);
+        document.getElementById("predictionLabel").innerHTML = prediction;
+      }
+
+      async function init() {
+        canvas = new fabric.Canvas("drawing-area");
+        canvas.isDrawingMode = true;
+        model = await tf.loadLayersModel("static/model/model.json");
+      }
+
+      init();
+    </script>
+  </body>
+</html>
