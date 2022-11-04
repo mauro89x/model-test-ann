@@ -22,7 +22,7 @@
         align-items: center;
         justify-content: space-evenly;
       }
-      #predictBtn {
+      button {
         width: 10em;
         height: 5em;
         background-color: aquamarine;
@@ -43,8 +43,16 @@
         cursor: crosshair;
         border: 1px solid blue;
       }
-      marquee {
-        background-color: bisque;
+      #image-preview {
+        border: 2px dotted blue;
+        width: 30px;
+        height: 30px;
+      }
+      .preview-wrapper {
+        margin-top: 20px;
+      }
+      .clearBtn {
+        margin-top: 10px;
       }
       footer {
         display: flex;
@@ -59,19 +67,30 @@
     </style>
   </head>
   <body>
-    <marquee><i>Write a number for Numbotron the guess!!!</i></marquee>
     <div id="wrapper">
       <div id="first-column-wrapper">
         <h2>Draw a number for the model to guess...</h2>
         <canvas id="drawing-area"></canvas>
-        <div id="image-preview"></div>
+        <button class="clearBtn" onclick="clearCanvas()">Clear</button>
+        <div class="preview-wrapper">
+          <span>Drawing preview</span>
+          <div id="image-preview"></div>
+        </div>
       </div>
-      <button id="predictBtn" onclick="guessBtn()">Guess!</button>
+
+      <button id="predictBtn" onclick="guessBtn()">Guess >></button>
       <label id="predictionLabel">Here's the prediction!</label>
     </div>
     <footer>&copy; Artificial Neural Network Model</footer>
     <script type="text/javascript">
       var model, canvas;
+
+      function clearCanvas() {
+        if (canvas && document.getElementsByTagName("img").length > 0) {
+          canvas.clear();
+          document.getElementsByTagName("img")[0].remove();
+        }
+      }
 
       async function guessBtn() {
         var img = new Image(28, 28);
