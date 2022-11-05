@@ -9,6 +9,7 @@
       type="text/javascript"
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+    <script src="static/lib/hermite.js"></script>
     <title>ANN for handwritten numbers</title>
     <style>
       body {
@@ -43,10 +44,8 @@
         cursor: crosshair;
         border: 1px solid blue;
       }
-      #image-preview {
-        border: 2px dotted blue;
-        width: 30px;
-        height: 30px;
+      #canvasPreview {
+        display: none;
       }
       .preview-wrapper {
         margin-top: 20px;
@@ -73,41 +72,62 @@
         <canvas id="drawing-area"></canvas>
         <button class="clearBtn" onclick="clearCanvas()">Clear</button>
         <div class="preview-wrapper">
-          <span>Drawing preview</span>
-          <div id="image-preview"></div>
+          <canvas id="canvasPreview"></canvas>
         </div>
       </div>
 
-      <button id="predictBtn" onclick="guessBtn()">Guess >></button>
+      <button id="predictBtn" onclick="guessBtn()">Classify >></button>
       <label id="predictionLabel">Here's the prediction!</label>
     </div>
     <footer>&copy; Artificial Neural Network Model</footer>
     <script type="text/javascript">
-      var model, canvas;
+      var model;
+      var canvas;
+      var smallCanvas = document.getElementById("canvasPreview");
+      var ctx2 = smallCanvas.getContext("2d", { willReadFrequently: true });
 
       function clearCanvas() {
-        if (canvas && document.getElementsByTagName("img").length > 0) {
+        if (canvas && smallCanvas) {
           canvas.clear();
-          document.getElementsByTagName("img")[0].remove();
+          ctx2.clearRect(0, 0, smallCanvas.width, smallCanvas.height);
         }
       }
 
       async function guessBtn() {
-        var img = new Image(28, 28);
-        img.src = canvas.toDataURL("image/png");
-        document.getElementById("image-preview").appendChild(img);
+        resample_single(canvas, 28, 28, smallCanvas);
 
-        let image_toPredict = tf.browser.fromPixels(img);
-        image_toPredict = image_toPredict.reshape([null, 28, 28, 1]);
-        const prediction = model.predict(image_toPredict);
+        var imgData = ctx2.getImageData(0, 0, 28, 28);
+        var arr = [];
+        var arr28 = [];
 
-        console.log(prediction);
-        document.getElementById("predictionLabel").innerHTML = prediction;
+        for (var p = 0; p < imgData.data.length; p += 4) {
+          var valor = imgData.data[p + 3] / 255;
+          arr28.push([valor]);
+          if (arr28.length == 28) {
+            arr.push(arr28);
+            arr28 = [];
+          }
+        }
+
+        arr = [arr];
+        var tensor4 = tf.tensor4d(arr);
+        const prediction = model.predict(tensor4).dataSync();
+        var result = getMaxNeurona(prediction);
+        document.getElementById("predictionLabel").innerHTML = result;
+      }
+
+      function getMaxNeurona(results) {
+        var idx = results.indexOf(Math.max.apply(null, results));
+        return idx !== -1 ? idx : "Error!";
       }
 
       async function init() {
         canvas = new fabric.Canvas("drawing-area");
         canvas.isDrawingMode = true;
+        if (canvas.freeDrawingBrush) {
+          canvas.freeDrawingBrush.color = "#000000";
+          canvas.freeDrawingBrush.width = 10;
+        }
         model = await tf.loadLayersModel("static/model/model.json");
       }
 
